@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/monopoly-round-viewsonic/static/css/main.15dd59eb.css",
+    "main.js": "/monopoly-round-viewsonic/static/js/main.e69bf1e0.js",
+    "static/js/453.800fdb9f.chunk.js": "/monopoly-round-viewsonic/static/js/453.800fdb9f.chunk.js",
+    "index.html": "/monopoly-round-viewsonic/index.html",
+    "main.15dd59eb.css.map": "/monopoly-round-viewsonic/static/css/main.15dd59eb.css.map",
+    "main.e69bf1e0.js.map": "/monopoly-round-viewsonic/static/js/main.e69bf1e0.js.map",
+    "453.800fdb9f.chunk.js.map": "/monopoly-round-viewsonic/static/js/453.800fdb9f.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.15dd59eb.css",
+    "static/js/main.e69bf1e0.js"
+  ]
+}
