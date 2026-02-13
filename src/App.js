@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState, useRef, useEffect } from 'react';
 import StartPage from './pages/StartPage';
@@ -19,6 +18,7 @@ function App() {
   const [page, setPage] = useState('start');
   const [players, setPlayers] = useState(cfg.players || []);
   const [scale, setScale] = useState(1);
+  const [currentProblemIndex,setCurrentProblemIndex]=useState(0)
   const audioRef=useRef(null)
 
   const navigateTo = (pageName) => setPage(pageName);
@@ -29,7 +29,7 @@ function App() {
 
   const handleStartGame=()=>{
     if(audioRef.current && audioRef.current.paused){
-      audioRef.current.volume=0.5
+      audioRef.current.volume=0.1
       audioRef.current.currentTime = 0; // 從頭開始播放
       audioRef.current.play().catch((error)=>{
         console.log("Audio failed",error)
@@ -55,8 +55,8 @@ function App() {
       <div style={gameStyle}>
         {page === 'start' && (<StartPage navigateTo={navigateTo} onStartGame={handleStartGame} backgroundImage={backgroundImages.start}/>)}
         {page === 'instructions' && (<InstructionsPage navigateTo={navigateTo} onStartGame={handleStartGame} backgroundImage={backgroundImages.instructions}/>)}
-        {page === 'monopoly' && (<MonopolyPage navigateTo={navigateTo} backgroundImage={backgroundImages.monopoly}/>)}
-        {page === 'scores' && (<ScoresPage navigateTo={navigateTo} backgroundImage={backgroundImages.scores}/>)}
+        {page === 'monopoly' && (<MonopolyPage navigateTo={navigateTo} backgroundImage={backgroundImages.monopoly} currentProblemIndex={currentProblemIndex} setCurrentProblemIndex={setCurrentProblemIndex} players={players} setPlayers={setPlayers} bgmAudio={audioRef.current}/>)}
+        {page === 'scores' && (<ScoresPage navigateTo={navigateTo} backgroundImage={backgroundImages.scores} players={players} setPlayers={setPlayers} bgmAudio={audioRef.current}/>)}
       </div>
 
       <audio ref={audioRef} src={cfg.sounds?.bgm || './sounds/funny-cartoon-no-copyright-music.mp3'} loop preload='auto'/>
