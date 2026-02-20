@@ -201,10 +201,35 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
         );
     };
 
+    // 判斷當前第幾步的操作
+    const handleAfterStepActions=(step)=>{
+        if (step >= 24) {
+            setSectionVisible({ dice: false, question: true, chest: false, chance: false });
+            setTheEndStep(true);
+        } 
+        else if (step === 5 || step===19) {
+            handleOpenChest(step).then(() => {
+                // 換下一位玩家
+                handleNextPlayerTurn()
+            }).catch(()=>{})
+        } 
+        else if (step === 12) {
+            handleOpenChance()
+        } 
+        else if(step === 1){
+            // 換下一位玩家
+            handleNextPlayerTurn()
+            setSectionVisible({ dice: true, question: false, chest: false, chance: false });
+        }
+        else {
+            // 只有一般格子才顯示問題
+            setSectionVisible({ dice: false, question: true, chest: false, chance: false });
+        }
+    }
+
     // 移動玩家到下一步
     const handleMoveThePlayer = (playerId,playerCurStep, nextStepOrTotal) => {
         let finalStep;
-        
         const currentPlayer = players.find(p => p.id === playerId);
         if (!currentPlayer) return;
 
@@ -233,28 +258,7 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
         });
 
         setTimeout(() => {
-            if (finalStep >= 24) {
-                setSectionVisible({ dice: false, question: true, chest: false, chance: false });
-                setTheEndStep(true);
-            } 
-            else if (finalStep === 5 || finalStep===19) {
-                handleOpenChest(finalStep).then(() => {
-                    // 換下一位玩家
-                    handleNextPlayerTurn()
-                }).catch(()=>{})
-            } 
-            else if (finalStep === 12) {
-                handleOpenChance()
-            } 
-            else if(finalStep === 1){
-                // 換下一位玩家
-                handleNextPlayerTurn()
-                setSectionVisible({ dice: true, question: false, chest: false, chance: false });
-            }
-            else {
-                // 只有一般格子才顯示問題
-                setSectionVisible({ dice: false, question: true, chest: false, chance: false });
-            }
+            handleAfterStepActions(finalStep)
             setIsRolling(false);
             setDiceNumber(3); 
         }, 1000);
@@ -296,10 +300,12 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
 
     const handleOpenChest=(curStep)=>{// 打開命運卡
         return new Promise((resolve,reject)=>{
+            let currentNewStep;
             const cardId=getRandomCard("chest");
             setCardIndex(prev=>({...prev,chest:cardId}))
             setSectionVisible({dice:false,question:false,chest:true,chance:false})
             setTimeout(()=>{
+                setSectionVisible({dice:false,question:false,chest:false,chance:false})
                 if(cardId===1){// 後退一步
                     const playerId=players.find(p=>p.current===true).id
                     handleMoveThePlayer(playerId,curStep,-1)
@@ -333,12 +339,17 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                                 if (distance < minDistance|| (distance === minDistance && p.step > currentPlayer.step)) {
                                     minDistance = distance;
                                     closestPlayer = p;
+                                    currentNewStep= p.step;
                                 }
                             }
                         });
     
-                        // 如果場上沒別人，就不換
-                        if (!closestPlayer) return prevPlayers;
+                        // 如果找不到其他人（例如只有一個玩家），就原地不動
+                        if (!closestPlayer) {
+                            currentNewStep=null
+                            return prevPlayers
+                        }
+                        
     
                         // 執行交換 (回傳新的陣列)
                         return prevPlayers.map(p => {
@@ -358,7 +369,15 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                             return p;
                         });
                     });
-                    setSectionVisible({ dice: false, question: true, chest: false, chance: false });
+                    // 根據換到的位置判斷之後的操作
+                    if(currentNewStep===null){
+                        // 換下一位玩家
+                        handleNextPlayerTurn()
+                        setSectionVisible({dice:true,question:false,chest:false,chance:false})
+                    }
+                    else{
+                        handleAfterStepActions(currentNewStep)
+                    }
                     reject()
                 }
                 resolve()
@@ -368,10 +387,12 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
     }
 
     const handleOpenChance=()=>{// 打開機會卡
+        let currentNewStep;
         const cardId=getRandomCard("chance");
         setCardIndex(prev=>({...prev,chance:cardId}))
         setSectionVisible({dice:false,question:false,chest:false,chance:true})
         setTimeout(()=>{
+            setSectionVisible({dice:false,question:false,chest:false,chance:false})
             if(cardId===1){// 再骰一次
                 setSectionVisible({dice:true,question:false,chest:false,chance:false})
                 handleDiceClick(12)
@@ -402,14 +423,16 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                             if (distance < minDistance) {
                                 minDistance = distance;
                                 closestPlayer = p;
+                                currentNewStep= p.step;
                             }
                         }
                     });
 
                     // 如果找不到其他人（例如只有一個玩家），就原地不動
-                    if (!closestPlayer) return prevPlayers;
-
-
+                    if (!closestPlayer) {
+                        currentNewStep=null
+                        return prevPlayers
+                    }
 
                     // 更新當前玩家的位置
                     return prevPlayers.map(p => {
@@ -425,7 +448,15 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                         return p;
                     });
                 });
-                setSectionVisible({ dice: false, question: true, chest: false, chance: false });
+                // 根據換到的位置判斷之後的操作
+                if(currentNewStep===null){
+                    // 換下一位玩家
+                    handleNextPlayerTurn()
+                    setSectionVisible({dice:true,question:false,chest:false,chance:false})
+                }
+                else{
+                    handleAfterStepActions(currentNewStep)
+                }
             }
         },1000)
     }
@@ -506,84 +537,6 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                 ))}
             </div>
         </div>
-        // <div className="page-container" style={pageStyle}>
-        //     <button onClick={()=>{navigateTo("scores")}}>
-        //         navigateTo
-        //     </button>
-        //     <span className="step-1">
-        //         <img src="./images/object/Basketball_monopoly_GO_text.png" alt="" />
-        //         <img className="arrow-direction" src="./images/object/Basketball_monopoly_GO_arrow.png" alt="" />
-        //     </span>
-        //     <span className="step-2">
-        //         Question
-        //     </span>
-        //     <span className="step-3">
-        //         Question
-        //     </span>
-        //     <span className="step-4">
-        //         Question
-        //     </span>
-        //     <span className="step-5">
-        //         <img src="./images/object/Basketball_monopoly_question_mark.png" alt="" />
-        //     </span>
-        //     <span className="step-6">
-        //         Question
-        //     </span>
-        //     <span className="step-7">
-        //         Question
-        //     </span>
-        //     <span className="step-8">
-        //         Question
-        //     </span>
-        //     <span className="step-9">
-        //         Question
-        //     </span>
-        //     <span className="step-10">
-        //         Question
-        //     </span>
-        //     <span className="step-11">
-        //         Question
-        //     </span>
-        //     <span className="step-12">
-        //         <img src="./images/object/Basketball_monopoly_treasure_chest.png" alt="" />
-        //     </span>
-        //     <span className="step-13">
-        //         Question
-        //     </span>
-        //     <span className="step-14">
-        //         Question
-        //     </span>
-        //     <span className="step-15">
-        //         Question
-        //     </span>
-        //     <span className="step-16">
-        //         Question
-        //     </span>
-        //     <span className="step-17">
-        //         Question
-        //     </span>
-        //     <span className="step-18">
-        //         Question
-        //     </span>
-        //     <span className="step-19">
-        //         <img src="./images/object/Basketball_monopoly_question_mark.png" alt="" />
-        //     </span>
-        //     <span className="step-20">
-        //         Question
-        //     </span>
-        //     <span className="step-21">
-        //         Question
-        //     </span>
-        //     <span className="step-22">
-        //         Question
-        //     </span>
-        //     <span className="step-23">
-        //         Question
-        //     </span>
-        //     <span className="step-24">
-        //         Question
-        //     </span>
-        // </div>
     )
 }
 
