@@ -1,70 +1,37 @@
-# Getting Started with Create React App
+# 🎲 Monopoly Learning Game (Loop Version)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+一個基於 React 開發的「迴圈式」互動大富翁遊戲。玩家在 22 格的地圖上循環移動，透過回答問題累積積分，並觸發各種特殊事件。
 
-## Available Scripts
+## 📋 遊戲流程 (Page Flow)
 
-In the project directory, you can run:
+開始畫面 → 遊戲說明 → 大富翁主遊戲 (迴圈地圖) → 結算排名
+  ↑ (循環)          ↓ (事件觸發)
+骰子/移動 ←→ 題目回答 / 命運與機會事件
 
-### `npm start`
+### 核心頁面說明
+| 頁面名稱 | 類型 | 目的 |
+|-----------|------|---------|
+| `start` | Intro | 遊戲標題與開場進入點 |
+| `instructions` | Info | 操作說明與遊戲規則 |
+| `monopoly` | Game | **核心遊戲區**：包含迴圈地圖、棋子移動動畫、事件判定 |
+| `scores` | Ending | 最終積分統計與排行榜 |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 迴圈地圖機制 (Loop Mechanics)
+* **地圖結構**：地圖共有 24 格，玩家由第 1 格出發。
+* **迴圈邏輯**：當玩家移動超過第 24 格時，會自動歸零計算回到起點區域（例如：24 + 2 = 移至第 2 格），達成循環遊戲體驗。
+* **特殊格點判定**：
+  - **命運格 (第 5,19 格)**：觸發命運卡（含：後退一格、回到原點、暫停一回、換位等效果）。
+  - **機會格 (第 12 格)**：觸發機會事件（含：前進一格、獲得分數、暫停一回、換位等效果）。
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ 技術實作細節 (Tech Stack)
 
-### `npm test`
+### 1. 非同步位移與順序保證
+- **Framework**: React (Hooks: `useState`, `useEffect`, `useRef`)
+- **Scaling Solution**: CSS `transform: scale()` 動態計算 (基準: 1920x1080)
+- **Assets**: 透過 `cfg.js` 設定檔動態載入圖片與音效路徑。
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Quick Start
+npm install
+npm start
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* **基準解析度**：1920 x 1080。
