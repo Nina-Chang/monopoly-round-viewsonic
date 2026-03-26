@@ -15,7 +15,7 @@ const InstructionsPage = ({ navigateTo, backgroundImage }) => {
       <div className="instructions-text">
         <p>1. Roll the dice and move your game piece.</p>
         <p>2. Teams may land on spaces with questions, Fate cards, or Chance cards.</p>
-        <p>3. The first team to finish wins!</p>
+        <p>3. The first team to finish the required number of laps wins!</p>
       </div>
       <button className="image-button continue-button loop-animation" onClick={() => navigateTo('monopoly')}>
         <img src={cfg.images?.btnNext || 'images/object/Basketball_monopoly_next_button.png'} alt="Continue" />

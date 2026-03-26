@@ -126,6 +126,8 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
             setButtonScale(initialButtonScale);
             // 音效
             playSound(cfg?.sounds?.wrong || "./sounds/wrong.mp3")
+            const playerId=players.find(p=>p.current===true).id
+            handleMoveThePlayer(playerId,null,-100)//答錯回到原點
             setTimeout(()=>{
                 setCurrentProblemIndex(currentProblemIndex+1)
                 // 卡牌消失
