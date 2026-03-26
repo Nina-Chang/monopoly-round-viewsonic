@@ -247,15 +247,22 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
 
         // 更新玩家位置
         setPlayers(prevPlayers => {
+            // 找出在同一個 step 的其他玩家
             const playersOnThisStep = prevPlayers.filter(p => p.step === finalStep && p.id !== playerId);
-            // 找出這些玩家中，最大的 positionInStep 是多少
-            const maxPosition = playersOnThisStep.length > 0 
-            ? Math.max(...playersOnThisStep.map(p => p.positionInStep || 0)) 
-            : 0;
+            // 把這些玩家佔用的 positionInStep 全部放進一個 Set (效能更好，查詢快)
+            const occupiedPositions = new Set(playersOnThisStep.map(p => p.positionInStep));
+            
+            //  從 1 開始找，第一個不在 Set 裡的數字就是我們要的最小空位
+            let targetPosition = 1;
+            while (occupiedPositions.has(targetPosition)) {
+                targetPosition++;
+            }
+
+            //  更新玩家狀態
             return prevPlayers.map(p => 
                 p.id === playerId 
-                ? { ...p, step: finalStep, positionInStep: maxPosition+1>prevPlayers.length?1:maxPosition+1 } 
-                : p
+                    ? { ...p, step: finalStep, positionInStep: targetPosition } 
+                    : p
             );
         });
 
@@ -356,13 +363,17 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                         // 執行交換 (回傳新的陣列)
                         return prevPlayers.map(p => {
                             const playersOnThisStep = prevPlayers.filter(p => p.step === closestPlayer.step && p.id !== currentPlayer.id);
-                            // 找出這些玩家中，最大的 positionInStep 是多少
-                            const maxPosition = playersOnThisStep.length > 0 
-                            ? Math.max(...playersOnThisStep.map(p => p.positionInStep || 0)) 
-                            : 0;
+                            //  把這些玩家佔用的 positionInStep 全部放進一個 Set (效能更好，查詢快)
+                            const occupiedPositions = new Set(playersOnThisStep.map(p => p.positionInStep));
+                            
+                            //  從 1 開始找，第一個不在 Set 裡的數字就是我們要的最小空位
+                            let targetPosition = 1;
+                            while (occupiedPositions.has(targetPosition)) {
+                                targetPosition++;
+                            }
                             if (p.id === currentPlayer.id) {
                                 // 當前玩家拿到目標的位置
-                                return { ...p, step: closestPlayer.step,positionInStep:maxPosition+1>prevPlayers.length?1:maxPosition+1 };
+                                return { ...p, step: closestPlayer.step,positionInStep:targetPosition };
                             }
                             if (p.id === closestPlayer.id) {
                                 // 目標玩家拿到當前玩家的位置
@@ -439,13 +450,17 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                     // 更新當前玩家的位置
                     return prevPlayers.map(p => {
                         const playersOnThisStep = prevPlayers.filter(p => p.step === closestPlayer.step && p.id !== currentPlayer.id);
-                        // 找出這些玩家中，最大的 positionInStep 是多少
-                        const maxPosition = playersOnThisStep.length > 0 
-                        ? Math.max(...playersOnThisStep.map(p => p.positionInStep || 0)) 
-                        : 0;
+                        //  把這些玩家佔用的 positionInStep 全部放進一個 Set (效能更好，查詢快)
+                        const occupiedPositions = new Set(playersOnThisStep.map(p => p.positionInStep));
+                        
+                        //  從 1 開始找，第一個不在 Set 裡的數字就是我們要的最小空位
+                        let targetPosition = 1;
+                        while (occupiedPositions.has(targetPosition)) {
+                            targetPosition++;
+                        }
                         if (p.id === currentPlayer.id) {
                             // 將自己的 step 設為跟最近的人一樣
-                            return { ...p, step: closestPlayer.step,positionInStep:maxPosition+1>prevPlayers.length?1:maxPosition+1 };
+                            return { ...p, step: closestPlayer.step,positionInStep:targetPosition };
                         }
                         return p;
                     });
