@@ -227,19 +227,39 @@ body, html {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  will-change: transform;/*  防止縮放時文字變模糊或跳動 */
 }
 .answer-image-button{
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
+  transform: scale(1);
+
+  /* 💡 加入固定寬高，防止 Layout 重新計算 */
+  width: 700px;   
+  height: 60px;    
+
+  /* 💡 強制開啟硬體加速，防止第一次動畫閃爍 */
+  backface-visibility: hidden;
 }
 
-.answer-image-button:hover:not(:disabled) {
+.answer-image-button:not(:disabled):hover {
     transform: scale(1.1) !important;
 }
 .answer-image-button:disabled {
     color:#000;
+}
+
+@keyframes clickPop {
+  0% { transform: scale(1.1); }   
+  50% { transform: scale(0.9); }  
+  100% { transform: scale(1); }  
+}
+
+.clicking {
+  animation: clickPop 0.25s ease-out; 
+  pointer-events: none; /* 動畫時不接受再次點擊，防止連續點擊 Bug */
 }
 
 .card-section{

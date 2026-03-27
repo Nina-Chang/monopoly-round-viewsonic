@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect,useRef } from 'react'
 
 const cfg = (typeof window !== 'undefined' && window.gameConfig) ? window.gameConfig : {};
 
@@ -6,15 +6,13 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
     const [scaleForDice, setScaleForDice] = useState(1)
     const initialButtonState={A:-1,B:-1,C:-1} // 0:false 1:true -1:not yet to choose
     const [isCorrect, setIsCorrect] = useState(initialButtonState) // 0:false 1:true -1:not yet to choose
-    const initialButtonScale={A:1,B:1,C:1}
-    const [buttonScale, setButtonScale] = useState(initialButtonScale);
-    const [buttonDisabled, setButtonDisabled] = useState(false)
     const [sectionVisible, setSectionVisible] = useState({dice:true,question:false,chest:false,chance:false})
     const [cardIndex, setCardIndex] = useState({chest:0,chance:0});
     const [diceNumber, setDiceNumber] = useState(3); // 預設顯示 3 點
     const [isRolling, setIsRolling] = useState(false);
-    const [theEndStep, setTheEndStep] = useState(false)
     const currentPlayer=players.find(p=>p.current===true)
+    const isProcessing = useRef(false);
+    const [clickingBtn, setClickingBtn] = useState(null);
     
     const pageStyle = { 
         backgroundImage: `url(${backgroundImage})`,
@@ -99,10 +97,10 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
 
     // 選項按鈕點擊處理
     const handleButtonClick = async (btn, optionTxt) => {
-        if (buttonDisabled) return;// 防止重複點擊
-        setButtonDisabled(true);
-        setButtonScale({...initialButtonScale, [btn]:0.9});
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // 防止重複點擊
+        if (isProcessing.current) return;
+        isProcessing.current = true;
+        setClickingBtn(btn);
         handleAnswer(btn, optionTxt);
     };
 
@@ -110,20 +108,23 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
         if(cfg?.questions?.questions?.[currentProblemIndex]?.answer===optionText){
             // 更改按鈕狀態
             setIsCorrect(prevState => ({ ...prevState, [button]: 1 }));
-            setButtonScale(initialButtonScale);
             // 音效
             playSound(cfg?.sounds?.correct || "./sounds/correct.mp3")
             setTimeout(()=>{
                 setCurrentProblemIndex(currentProblemIndex+1)
                 // 卡牌消失
                 setSectionVisible({dice:true,question:false,chest:false,chance:false})
+                if (currentPlayer && currentPlayer.step >= 24) {
+                    setCurrentProblemIndex(0);
+                    navigateTo("scores");
+                    return;
+                }
                 reset()
             },1000)
         }
         else{
             // 更改按鈕狀態
             setIsCorrect(prevState => ({ ...prevState, [button]: 0 }));
-            setButtonScale(initialButtonScale);
             // 音效
             playSound(cfg?.sounds?.wrong || "./sounds/wrong.mp3")
             const playerId=players.find(p=>p.current===true).id
@@ -137,7 +138,7 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
         }
     }
 
-    const AnswerBackground = ({ status }) => {
+    const AnswerBackground = React.memo(({ status }) => {
         let imgSrc = '';
 
         if (status === -1) {// 還沒選
@@ -151,7 +152,7 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
         return (
             <img src={imgSrc} alt={`Basketball_monopoly_answer_${status}`}  loading="lazy" decoding="async"/>
         );
-    };
+    });
 
     const handleNextPlayerTurn=()=>{
         setPlayers(prevPlayers => {
@@ -175,12 +176,9 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
     }
 
     const reset=()=>{
-        if(theEndStep===true){
-            setCurrentProblemIndex(0)
-            navigateTo("scores")
-        }
         setIsCorrect(initialButtonState);
-        setButtonDisabled(false)
+        isProcessing.current=false
+        setClickingBtn(null)
         // 換下一位玩家
         handleNextPlayerTurn()
     }
@@ -207,7 +205,6 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
     const handleAfterStepActions=(step)=>{
         if (step >= 24) {
             setSectionVisible({ dice: false, question: true, chest: false, chance: false });
-            setTheEndStep(true);
         } 
         else if (step === 5 || step===19) {
             handleOpenChest(step).then(() => {
@@ -508,23 +505,21 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                 <span className='question-content-text'>{cfg?.questions?.questions?.[currentProblemIndex]?.question || "Default Question"}</span>
                 <img src="./images/object/Basketball_monopoly_question_frame.png" alt="" />
                 <div className="answer-section">
-                    <button className="answer-image-button"
-                    disabled={buttonDisabled} 
-                    style={{transform: `scale(${buttonScale.A || 1})`}}
+                    <button 
+                    className={`answer-image-button ${clickingBtn === 'A' ? "clicking" : ''}`}
+                    disabled={isProcessing.current} 
                     onClick={()=>{handleButtonClick('A',cfg.questions.questions[currentProblemIndex]?.options[0])}}>
                         <div className="answer-text">{cfg.questions.questions[currentProblemIndex]?.options[0] || `A`}</div>
                         <AnswerBackground status={isCorrect.A}/>
                     </button>
-                    <button className="answer-image-button"
-                    disabled={buttonDisabled} 
-                    style={{transform: `scale(${buttonScale.B || 1})`}}
+                    <button className={`answer-image-button ${clickingBtn === 'B' ? "clicking" : ''}`}
+                    disabled={isProcessing.current} 
                     onClick={()=>handleButtonClick('B',`${cfg.questions.questions[currentProblemIndex]?.options[1]}`)}>
                         <div className="answer-text">{cfg.questions.questions[currentProblemIndex]?.options[1] || `B`}</div>
                         <AnswerBackground status={isCorrect.B}/>
                     </button>
-                    <button className="answer-image-button"
-                    disabled={buttonDisabled} 
-                    style={{transform: `scale(${buttonScale.C || 1})`}}
+                    <button className={`answer-image-button ${clickingBtn === 'C' ? "clicking" : ''}`}
+                    disabled={isProcessing.current} 
                     onClick={()=>handleButtonClick('C',`${cfg.questions.questions[currentProblemIndex]?.options[2]}`)}>
                         <div className="answer-text">{cfg.questions.questions[currentProblemIndex]?.options[2] || `C`}</div>
                         <AnswerBackground status={isCorrect.C}/>
@@ -539,8 +534,8 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
                             <img src="./images/object/Basketball_monopoly_GO_text.png" alt="" />
                             <img className="arrow-direction" src="./images/object/Basketball_monopoly_GO_arrow.png" alt="" />
                             </>}
-                        {(stepNum === 5 ||stepNum === 19) && <img src="./images/object/Basketball_monopoly_question_mark.png" className="grid-icon" />}
-                        {stepNum === 12 && <img src="./images/object/Basketball_monopoly_treasure_chest.png" className="grid-icon" />}
+                        {(stepNum === 5 ||stepNum === 19) && <img src="./images/object/Basketball_monopoly_question_mark.png" alt="" className="grid-icon" />}
+                        {stepNum === 12 && <img src="./images/object/Basketball_monopoly_treasure_chest.png" alt="" className="grid-icon" />}
 
                         {
                             stepNum !== 1 && stepNum !== 5 && stepNum !== 12 && stepNum !== 19 && (

@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import StartPage from './pages/StartPage';
 import InstructionsPage from './pages/InstructionsPage';
 import MonopolyPage from './pages/MonopolyPage';
@@ -71,20 +71,22 @@ function App() {
     navigateTo('instructions')
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 視窗縮放
     const handleResize = () => {
-      if(window.innerWidth===0) return;
+      if (window.innerWidth === 0) return;
       const scaleX = window.innerWidth / 1920;
       const scaleY = window.innerHeight / 1080;
       setScale(Math.min(scaleX, scaleY));
     };
+
+    handleResize();
+
     window.addEventListener('resize', handleResize);
-    const timer=setTimeout(handleResize,100)
+    
     return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timer);
-    }
+        window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return (
