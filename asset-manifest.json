@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/monopoly-round-viewsonic/static/css/main.15dd59eb.css",
-    "main.js": "/monopoly-round-viewsonic/static/js/main.248f7ac3.js",
+    "main.css": "/monopoly-round-viewsonic/static/css/main.ee34ecca.css",
+    "main.js": "/monopoly-round-viewsonic/static/js/main.56f37f37.js",
     "static/js/453.800fdb9f.chunk.js": "/monopoly-round-viewsonic/static/js/453.800fdb9f.chunk.js",
     "index.html": "/monopoly-round-viewsonic/index.html",
-    "main.15dd59eb.css.map": "/monopoly-round-viewsonic/static/css/main.15dd59eb.css.map",
-    "main.248f7ac3.js.map": "/monopoly-round-viewsonic/static/js/main.248f7ac3.js.map",
+    "main.ee34ecca.css.map": "/monopoly-round-viewsonic/static/css/main.ee34ecca.css.map",
+    "main.56f37f37.js.map": "/monopoly-round-viewsonic/static/js/main.56f37f37.js.map",
     "453.800fdb9f.chunk.js.map": "/monopoly-round-viewsonic/static/js/453.800fdb9f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.15dd59eb.css",
-    "static/js/main.248f7ac3.js"
+    "static/css/main.ee34ecca.css",
+    "static/js/main.56f37f37.js"
   ]
 }
