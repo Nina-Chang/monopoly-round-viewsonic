@@ -111,14 +111,14 @@ const MonopolyPage = ({navigateTo, backgroundImage,currentProblemIndex,setCurren
             // 音效
             playSound(cfg?.sounds?.correct || "./sounds/correct.mp3")
             setTimeout(()=>{
-                setCurrentProblemIndex(currentProblemIndex+1)
-                // 卡牌消失
-                setSectionVisible({dice:true,question:false,chest:false,chance:false})
                 if (currentPlayer && currentPlayer.step >= 24) {
                     setCurrentProblemIndex(0);
                     navigateTo("scores");
                     return;
                 }
+                setCurrentProblemIndex(currentProblemIndex+1)
+                // 卡牌消失
+                setSectionVisible({dice:true,question:false,chest:false,chance:false})
                 reset()
             },1000)
         }
